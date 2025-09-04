@@ -335,3 +335,4 @@ External interface to OS = Sector (512 B / 4 KB)
 * HDD: sectors (linear chunks).
 
 * SSD: sectors (for OS) but internally uses pages (write) and blocks (erase).
+
