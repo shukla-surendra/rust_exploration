@@ -1,0 +1,13 @@
+[package]
+name = "disk_exploration"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1.0.99"
+fatfs = "0.3.6"
+fscommon = "0.1.1"
+gpt = "4.1.0"
+mbrman = "0.6.1"
+log = "0.4" # optional, but handy if you enable gpt's logging
+slice = "0.0.4"
