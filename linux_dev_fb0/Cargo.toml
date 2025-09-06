@@ -1,0 +1,9 @@
+[package]
+name = "linux_dev_fb0"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1.0.99"
+libc = "0.2.175"
+memmap2 = "0.9.8"
