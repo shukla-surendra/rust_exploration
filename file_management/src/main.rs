@@ -8,6 +8,7 @@ fn main() {
 
     // # openning a file 
     let file = File::open("file.txt");
+    
     match file {
         Ok(file) => {
             println!("File opened successfully");
