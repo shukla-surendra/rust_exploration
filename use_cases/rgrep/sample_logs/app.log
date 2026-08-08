@@ -1,0 +1,9 @@
+2026-08-08T09:00:01Z INFO  starting server on port 8080
+2026-08-08T09:00:02Z INFO  connected to database
+2026-08-08T09:00:15Z ERROR failed to connect to cache: timeout after 5s
+2026-08-08T09:00:16Z WARN  retrying cache connection
+2026-08-08T09:00:20Z INFO  cache connected
+2026-08-08T09:01:05Z ERROR unhandled exception in request handler /api/users
+2026-08-08T09:01:06Z INFO  request completed in 12ms
+2026-08-08T09:02:30Z ERROR database query failed: connection reset
+2026-08-08T09:02:31Z INFO  shutting down gracefully

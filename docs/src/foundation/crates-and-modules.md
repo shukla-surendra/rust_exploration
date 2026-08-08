@@ -1,6 +1,25 @@
 # Crates & Modules
 
-`cargo new foundation`
+> **Coming from Python/Java:** in Python, every `.py` file is
+> automatically a module, and a folder is automatically a package — the
+> import system discovers files on disk for you. In Java, a file *is* a
+> class, and the folder structure must physically mirror the `package`
+> statement. Rust does **neither** — nothing is wired in automatically.
+> A file sitting in `src/` isn't part of your program until some `mod`
+> declaration says so. That's the one habit to unlearn here: adding a
+> `.rs` file is not enough by itself, the same way `import foo` in
+> Python "just works" the moment `foo.py` exists on the path.
+>
+> **Reach for multiple binary crates** (last section below) whenever you
+> have several related executables that should share core logic — think
+> a CLI and a server for the same product — instead of copy-pasting
+> shared code between separate Python scripts or separate Java `main`
+> classes.
+
+This page uses a scratch package created with `cargo new foundation` to
+demonstrate the wiring. The setup below (`src/welcome.rs` +
+`src/main.rs`) is intentionally minimal — the point is the `mod`/`use`
+plumbing, not what `greeting()` actually does.
 
 ## Single-file access in main.rs
 

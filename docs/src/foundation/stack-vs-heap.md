@@ -1,5 +1,21 @@
 # Stack vs Heap: why Rust defaults to the stack, and Python doesn't
 
+> **Coming from Python/Java:** Java is actually the more useful reference
+> point here, not Python — Java already splits primitives (`int`,
+> `double`, ...) onto the stack and objects (`new Foo()`) onto the heap,
+> so "some things are cheaper than others" isn't a new idea. What's new
+> is that in Rust, *your own structs* default to stack placement too
+> (unlike Java, where `new` always means heap) — you only pay for the
+> heap when you explicitly ask for it with `Box`/`Vec`/`String`. Python
+> has no stack/heap distinction visible to you at all: every value,
+> including a bare `5`, is a heap-allocated `PyObject` — see below for
+> why.
+>
+> **Practical payoff:** this is why Rust programs can be fast without a
+> garbage collector — most of your data never touches the (slower) heap
+> allocator at all, and the compiler decides that for you based on type,
+> not based on a runtime rule like Java's "primitive vs object."
+
 ## The two memory regions, quickly
 
 - **Stack** — a fixed-size, LIFO region. Allocating is just moving a

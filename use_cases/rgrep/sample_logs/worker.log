@@ -1,0 +1,5 @@
+2026-08-08T09:00:00Z INFO  worker booted, pool size 4
+2026-08-08T09:00:45Z INFO  processed job 1042
+2026-08-08T09:01:10Z ERROR job 1043 failed: invalid payload
+2026-08-08T09:01:11Z INFO  job 1043 moved to dead-letter queue
+2026-08-08T09:03:02Z INFO  processed job 1044

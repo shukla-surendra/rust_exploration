@@ -1,5 +1,21 @@
 # When doesn't Rust know a value's size at compile time?
 
+> **Coming from Python/Java:** you've never had to think about this,
+> because both languages route *everything* through a pointer/reference
+> automatically — a Python variable never holds a value directly, it
+> always holds a reference to a heap object, so "how big is this value"
+> is never the caller's problem. Rust asks you to think about it because
+> it's trying to avoid that automatic indirection where it can (see
+> [Stack vs Heap](./stack-vs-heap.md)) — which means the *rare* cases
+> where indirection truly is required (this page) have to be spelled out
+> explicitly instead of being silently true of everything.
+>
+> **Practical payoff:** this page is the reference for decoding one of
+> Rust's most common early error messages — `the size for values of type
+> ... cannot be known at compilation time`. If you hit that, the fix is
+> almost always "wrap it in `Box`/`&`," and the four scenarios below are
+> the reason why, in each concrete shape you'll actually encounter it.
+
 [Stack vs Heap](./stack-vs-heap.md) claimed Rust defaults to the stack
 because "sizes are known at compile time." This page answers the
 follow-up: when does that break down, and does strict typing cause it or

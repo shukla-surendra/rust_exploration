@@ -1,5 +1,22 @@
 # `String` vs `str` / `&str`
 
+> **Coming from Python/Java:** Python's `str` and Java's `String` are
+> each a single type — you never choose between an "owned" and
+> "borrowed" version, because both languages quietly garbage-collect
+> whichever one you're not using anymore. Rust makes that choice
+> explicit: `String` is the type you already know (owned, growable,
+> mutable), and `&str` is a *view* into string data someone else owns —
+> closer to a Python slice (`s[1:4]`, which also doesn't copy) than to
+> anything Java's `String` distinguishes.
+>
+> **Practical rule of thumb**, and the one that matters day to day:
+> accept `&str` in function parameters (like a Python function just
+> takes a string, no ownership question asked), and return/store
+> `String` only when you're building new data that needs to outlive the
+> function. Getting this backwards (taking `String` everywhere) is the
+> single most common "why do I need all these `.clone()`/`.to_string()`
+> calls" experience for people coming from Python or Java.
+
 ## `str` — the unsized string type
 
 `str` is a *dynamically sized type* (DST) — the compiler doesn't know its
