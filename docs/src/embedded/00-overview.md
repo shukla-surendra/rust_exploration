@@ -18,6 +18,52 @@ and [Systems From First Principles](../systems/00-overview.md) is real
 workflow are different enough to deserve their own section rather than
 being folded into either.
 
+## This section assumes ARM Cortex-M specifically — here's why
+
+"Microcontroller" covers several genuinely different, mutually
+incompatible instruction sets, not one — worth surveying before diving
+into chapters that otherwise silently assume Cortex-M throughout:
+
+| Chip / family | Instruction set | Cores | Rust support |
+|---|---|---|---|
+| STM32 (ST) | ARM Cortex-M (M0/M0+/M3/M4/M7/M33) | 1 (2, asymmetric, on H745/755) | First-class, upstream `rustup target add` |
+| RP2040 (Pico) | ARM Cortex-M0+ | 2, symmetric | First-class, upstream |
+| RP2350 (Pico 2) | Cortex-M33 *or* RISC-V (Hazard3), same silicon | 2 | First-class, upstream (both options) |
+| nRF52/nRF51 (Nordic) | ARM Cortex-M4/M0 | 1 | First-class, upstream |
+| ESP32 (original, S2, S3) | **Xtensa** LX6/LX7 | 2 (S2: 1) | **Fork only** — `esp-rs`'s patched compiler, installed via `espup`, not `rustup` |
+| ESP32-C3, C6, H2 | **RISC-V** (RV32IMC) | 1 | First-class, upstream |
+| AVR (classic Arduino Uno/Nano) | AVR, 8-bit | 1 | Nightly-only, `-Z build-std`, `avr-hal` |
+| PIC (Microchip) | PIC, proprietary (PIC32: MIPS) | 1 | No practical ecosystem |
+| MSP430 (TI) | MSP430, 16-bit | 1 | No practical ecosystem |
+| 8051 (legacy/cheap designs) | 8051, 8-bit | 1 | No practical ecosystem |
+
+**ARM Cortex-M is this section's example architecture specifically
+because it has the best Rust support by a wide margin** — fully
+upstream in `rustc`/LLVM, no forked toolchain, the deepest
+`embedded-hal`/PAC/HAL ecosystem. Everything in
+[Chapter 3](./03-interrupts-on-cortex-m.md) (the NVIC) and the `asm!`
+examples throughout are Cortex-M-specific for this reason; a RISC-V
+microcontroller (an ESP32-C3, say) uses a genuinely different interrupt
+mechanism and a different `-rt` crate (`riscv-rt` instead of
+`cortex-m-rt`), though the higher layers — `embedded-hal` traits,
+`heapless`, even Embassy — are largely architecture-agnostic and work
+similarly across both.
+
+**Most microcontrollers are single-core** — the default this whole
+section assumes, matching `cortex-m-rt`'s single `#[entry]` function
+and one NVIC. Dual-core (RP2040/2350, ESP32/S3) is real but still a
+minority; when it shows up, starting the second core is usually a
+single vendor-SDK call ("here's your stack, here's your entry point"),
+**not** anything resembling
+[Assembly, Chapter 10](../asm/10-multicore-and-smp.md)'s x86-64
+INIT-SIPI-SIPI real-mode trampoline — there's no privilege levels, no
+legacy boot mode, and often no OS at all to satisfy, so the whole
+reason that trampoline exists on x86-64 simply doesn't apply. (A few
+safety-critical automotive/industrial chips, e.g. Infineon's AURIX
+TriCore family, have 3+ cores running in **lockstep** — executing
+identical code redundantly for fault detection — a different purpose
+entirely from the SMP parallelism Assembly Chapter 10 covers.)
+
 ## The layered ecosystem, and where each piece sits
 
 ```

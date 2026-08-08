@@ -46,6 +46,47 @@ freestanding binary) needs raw assembly for, and nothing else:
    the sharpest x86-vs-ARM gotcha of all
 9. [Full Reference Checklist](./09-putting-it-together-checklist.md) —
    every piece above, one table, both architectures side by side
+10. [Multicore & SMP](./10-multicore-and-smp.md) — who wakes the other
+    cores, and why x86-64 needs a 16-bit trampoline to do it
+
+## A note on "firmware" — it's not one thing, and not every chip has it
+
+"Firmware" gets used loosely throughout this section (ACPI tables,
+PSCI calls in [Chapter 10](./10-multicore-and-smp.md), the boot process
+in [Systems, Chapter 9](../systems/09-hello-kernel-boot-to-execution.md))
+— worth pinning down what it actually refers to, since it's genuinely
+several different things at different layers, not one:
+
+- **Board/system firmware** (BIOS/UEFI on x86 boards, U-Boot/UEFI on
+  many ARM boards) — lives in a separate flash chip **on the board**,
+  not inside the CPU package at all. This is the "ROM, not RAM" the
+  reset vector points at in
+  [Systems, Chapter 9](../systems/09-hello-kernel-boot-to-execution.md).
+- **A Boot ROM baked into the CPU/SoC silicon itself** — permanent,
+  unchangeable, burned in at manufacture. On many ARM SoCs (though not
+  most x86 desktop/server chips) this is the true first code executed,
+  even before board firmware loads.
+- **Microcode** — baked into the CPU die, translating the externally-
+  visible instruction set into internal micro-ops; patchable via
+  updates the BIOS/OS loads at boot, without a new chip.
+- **Separate embedded management coprocessors** — Intel ME, AMD PSP:
+  distinct small processors inside the same package as the main cores,
+  running independent firmware, often orchestrating boot before the
+  main cores even start.
+
+**Microcontrollers, mostly, have none of this.** A Cortex-M chip
+(see [Rust for Embedded Systems, Chapter 1](../embedded/01-no-std-and-the-embedded-toolchain.md))
+typically has no BIOS/UEFI-equivalent — the program you flash *is* the
+only thing that runs, starting almost immediately at reset. Some chips
+still have a small immutable boot ROM purely for initial flashing/
+recovery, but nothing resembling the multi-layer firmware stack above.
+
+This matters for reading the rest of this section: when
+[Chapter 10](./10-multicore-and-smp.md#step-1-discovery--firmware-tells-the-os-what-exists)
+says "firmware tells the OS what cores exist," or PSCI is invoked as "a
+firmware service," it's specifically the board/system-firmware layer
+(or the boot-ROM/embedded-coprocessor layer providing PSCI on ARM) —
+not something baked into every CPU unconditionally.
 
 ## Prerequisites
 

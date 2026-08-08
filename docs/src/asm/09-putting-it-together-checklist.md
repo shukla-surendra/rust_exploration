@@ -28,10 +28,12 @@ code (`hello-kernel` or `OxideOS`) that demonstrates it.
   territory (BIOS/UEFI, Limine, U-Boot), not kernel assembly. See
   [Systems, Chapter 9](../systems/09-hello-kernel-boot-to-execution.md)'s
   "why isn't a bootloader needed" for exactly where that boundary sits.
-- **SMP (multi-core) bring-up** — waking secondary cores (`INIT`/`SIPI`
-  on x86, `PSCI` calls on aarch64) is a real and substantial topic on
-  its own, not covered by any chapter above; OxideOS's own roadmap
-  lists SMP as a future milestone, not yet implemented.
+- **SMP (multi-core) bring-up** — waking secondary cores is a real and
+  substantial topic on its own, covered separately in
+  [Chapter 10](./10-multicore-and-smp.md); OxideOS's own roadmap lists
+  SMP as a future milestone, not yet implemented, so unlike every row
+  in the table above, there's no real working code in this repo to
+  point at for it yet.
 - **Floating-point/SIMD context** (`fxsave`/`xsave` on x86-64, the `V`
   register file on aarch64) — only needed if a kernel lets userspace use
   floating point across a context switch; both `hello-kernel` and

@@ -127,6 +127,7 @@
   - [7. Context Switching](./asm/07-context-switching.md)
   - [8. Atomics & Memory Barriers](./asm/08-atomics-and-memory-barriers.md)
   - [9. Full Reference Checklist](./asm/09-putting-it-together-checklist.md)
+  - [10. Multicore & SMP](./asm/10-multicore-and-smp.md)
 
 - [Rust for Embedded Systems]()
   - [Overview](./embedded/00-overview.md)
@@ -139,3 +140,9 @@
   - [7. RTIC: the Alternative](./embedded/07-rtic-alternative.md)
   - [8. Hands-On: Blinky and Beyond](./embedded/08-hands-on-blinky-and-beyond.md)
   - [9. Embedded vs. OS Dev: Cheat Sheet](./embedded/09-embedded-vs-os-dev-cheat-sheet.md)
+
+- [QEMU: Why & Real-World Use Cases](./qemu.md)
+
+- [Cores, Threads, vCPUs & Fractional CPU](./cpu-division.md)
+
+- [cgroups, Namespaces & What a Container Actually Is](./cgroups-and-containers.md)

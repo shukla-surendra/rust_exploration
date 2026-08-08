@@ -43,6 +43,14 @@ setting these *from measurement* (see
 guessing, but the ceiling is genuinely lower — a real cost/density
 advantage in a cluster running many replicas.
 
+`cpu: "50m"` is **millicpu** — 50m means 1/20th of one CPU core, not a
+whole core running slower. See
+[Cores, Threads, vCPUs & Fractional CPU](../cpu-division.md) for
+exactly what that number controls (Linux cgroups CPU quota/period —
+the same mechanism `docker run --cpus=0.5` and AWS Fargate's fractional
+vCPU billing both use underneath) and why it's time-slicing, not a
+smaller unit of silicon.
+
 ## Health checks — wiring up what `/health`/`/ready` need from your code
 
 ```yaml

@@ -7,6 +7,60 @@ code that happens to work on one can be silently broken on the other —
 a real hazard when porting kernel code between the architectures the
 way `hello-kernel`/OxideOS represent.
 
+## Prerequisite: what's actually being kept in sync
+
+Barriers and coherency both operate on the same underlying thing: the
+**cache hierarchy** sitting between a core and RAM. Worth being
+concrete about before the rest of this chapter talks about "ordering"
+and "visibility" in the abstract.
+
+Every load/store a core executes is checked against this hierarchy
+automatically, in hardware, on every single access — never something
+software explicitly requests:
+
+```
+core → L1 (private, ~4 cycles) → L2 (private, ~12 cycles) → L3/LLC (shared, ~30-40 cycles) → RAM (hundreds of cycles)
+```
+
+- **L1** — smallest and fastest, split into L1i (instructions) and L1d
+  (data), private to each core.
+- **L2** — bigger, slower, still private to each core in most designs.
+- **L3 (last-level cache, LLC)** — much bigger, slower still, and —
+  per [Multicore & SMP](./10-multicore-and-smp.md#whats-private-per-core-and-whats-actually-shared) —
+  **shared across every core on the chip**. This is the shared cache
+  that chapter's private/shared inventory referred to.
+
+Caches don't store individual bytes — they store fixed-size **cache
+lines**, 64 bytes on both x86-64 and aarch64. Reading one byte pulls in
+the entire 64-byte line containing it. Each cached line carries a tag
+(which address range it represents), a valid bit, and — the part that
+matters for this chapter — a **coherency state**, tracked by a protocol
+called **MESI** (Modified / Exclusive / Shared / Invalid; vendor
+variants like MESIF/MOESI add a state or two but work the same way):
+when one core writes to a line, every other core's cached copy of that
+*same line* is automatically invalidated, forcing them to re-fetch the
+current value on next access.
+
+**This is exactly the split this chapter is built on:** MESI coherency
+is what guarantees a write eventually becomes visible to other cores at
+all — but it says nothing about *when*, relative to a core's *other*
+memory operations. That "when, relative to what else" question is
+precisely what barriers (below) control. Coherency without barriers
+still leaves you with a correct-eventually-but-unordered view of memory
+— which is exactly the "weakly ordered" behavior aarch64 exposes by
+default and x86-64 mostly hides.
+
+**One concrete, easy-to-hit consequence worth knowing by name: false
+sharing.** Two logically unrelated variables that happen to land in the
+same 64-byte cache line get bounced between cores' caches on every
+write to *either* one — full MESI invalidation traffic for data that
+was never actually shared between the threads touching it. This is a
+real, non-obvious performance bug in concurrent Rust code (two
+`AtomicU32`s in the same struct, hammered by different threads, can be
+dramatically slower than the same two fields padded onto separate cache
+lines) — worth knowing the mechanism even though this chapter's `asm!`
+examples don't need to address it directly.
+
 ## The core difference
 
 - **x86-64 is strongly ordered** (specifically, mostly TSO — Total
