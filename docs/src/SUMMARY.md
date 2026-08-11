@@ -25,6 +25,7 @@
     - [Structs & impl: Self, &self vs &mut self](./foundation/structs-and-methods.md)
     - [Traits](./foundation/traits.md)
     - [String vs str / &str](./foundation/strings.md)
+    - [Arrays, Vec, HashSet & HashMap](./foundation/collections.md)
   - [Error Handling]()
     - [Option, Result & unwrap_or_else](./foundation/option-result.md)
     - [Error Handling in main.rs](./foundation/error-handling.md)
