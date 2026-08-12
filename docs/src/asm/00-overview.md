@@ -48,6 +48,8 @@ freestanding binary) needs raw assembly for, and nothing else:
    every piece above, one table, both architectures side by side
 10. [Multicore & SMP](./10-multicore-and-smp.md) — who wakes the other
     cores, and why x86-64 needs a 16-bit trampoline to do it
+11. [I/O Ports & MMIO](./11-io-ports-and-mmio.md) — how the CPU actually
+    reaches a device's registers, tested against a real bare-metal boot
 
 ## A note on "firmware" — it's not one thing, and not every chip has it
 

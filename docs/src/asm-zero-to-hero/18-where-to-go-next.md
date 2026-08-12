@@ -1,5 +1,10 @@
 # 18. Where to Go Next
 
+This is the last chapter of the guided path — [Chapter 19](./19-instruction-reference.md)
+is an appendix after this one, not a continuation: a single lookup table
+of every general-purpose instruction from both architectures, for
+looking things up going forward rather than reading start to finish.
+
 ## What this section deliberately left out, and why
 
 **SIMD/vector instructions** (SSE/AVX on x86-64, NEON on ARM64) —

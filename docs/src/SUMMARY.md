@@ -73,6 +73,7 @@
     - [8. Build, Editions & the Linker Script](./systems/08-hello-kernel-build-and-linking.md)
     - [9. From QEMU's -kernel Flag to the First Rust Code](./systems/09-hello-kernel-boot-to-execution.md)
     - [10. UART Output & Panics](./systems/10-hello-kernel-uart-and-panics.md)
+  - [11. Talking to Hardware: PMIO vs. MMIO](./systems/11-talking-to-hardware-pmio-vs-mmio.md)
 
 - [OxideOS (Deep Dive)]()
   - [Overview](./oxideos/00-overview.md)
@@ -96,6 +97,7 @@
     - [07. Drivers: Writing New Hardware Code](./oxideos/study/07_drivers.md)
     - [Hardware Reference]()
       - [Index](./oxideos/study/hardware/README.md)
+      - [UART — The Protocol, Full Reference](./oxideos/study/hardware/uart_overview.md)
       - [8259A PIC — Interrupt Controller](./oxideos/study/hardware/8259A_pic.md)
       - [8253/8254 PIT — Timer](./oxideos/study/hardware/8253_pit.md)
       - [Intel 8042 — PS/2 Controller & Keyboard](./oxideos/study/hardware/8042_ps2_keyboard.md)
@@ -137,6 +139,7 @@
   - [16. x86-64 vs ARM64 Cheat Sheet](./asm-zero-to-hero/16-cheat-sheet.md)
   - [17. Mini Projects](./asm-zero-to-hero/17-mini-projects.md)
   - [18. Where to Go Next](./asm-zero-to-hero/18-where-to-go-next.md)
+  - [19. Full Instruction Reference](./asm-zero-to-hero/19-instruction-reference.md)
 
 - [Assembly for OS Development]()
   - [Overview](./asm/00-overview.md)
@@ -150,6 +153,7 @@
   - [8. Atomics & Memory Barriers](./asm/08-atomics-and-memory-barriers.md)
   - [9. Full Reference Checklist](./asm/09-putting-it-together-checklist.md)
   - [10. Multicore & SMP](./asm/10-multicore-and-smp.md)
+  - [11. I/O Ports & MMIO: How the CPU Talks to Hardware](./asm/11-io-ports-and-mmio.md)
 
 - [Rust for Embedded Systems]()
   - [Overview](./embedded/00-overview.md)

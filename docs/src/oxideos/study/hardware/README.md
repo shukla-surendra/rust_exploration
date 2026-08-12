@@ -5,6 +5,12 @@ Each doc explains what the hardware does, its I/O ports and registers,
 its initialization sequence, and exactly how OxideOS uses it — with
 line-level references to the source code.
 
+**New to UART specifically?** Start with
+[uart_overview.md](uart_overview.md) — the protocol-level explanation
+(why it's "asynchronous," bit framing, the device ecosystem, everywhere
+it shows up in OS boot/debug) that [16550_uart.md](16550_uart.md) and
+[modern_serial_debug.md](modern_serial_debug.md) below assume.
+
 | Chip / Bus | Source File | Doc |
 |---|---|---|
 | 8259A PIC — Interrupt Controller | `drivers/pic.rs` | [8259A_pic.md](8259A_pic.md) |

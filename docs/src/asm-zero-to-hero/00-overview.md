@@ -85,6 +85,9 @@ output before being written down.
 18. [Where to Go Next](./18-where-to-go-next.md) — SIMD/NEON, and the
     existing [OS-development-focused assembly section](../asm/00-overview.md)
     in this book
+19. [Full Instruction Reference](./19-instruction-reference.md) — every
+    general-purpose integer instruction from both architectures, one
+    lookup table, organized by category
 
 ## How this differs from the other assembly section in this book
 

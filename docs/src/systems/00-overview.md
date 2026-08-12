@@ -62,6 +62,10 @@ the way):
 9. [From QEMU's `-kernel` Flag to the First Rust Code](./09-hello-kernel-boot-to-execution.md)
 10. [UART Output & Panics](./10-hello-kernel-uart-and-panics.md)
 
+**General (can be read any time after chapter 1):**
+
+11. [Talking to Hardware: Port-Mapped I/O vs. Memory-Mapped I/O](./11-talking-to-hardware-pmio-vs-mmio.md) — the two mechanisms behind chapter 10's UART code, and everything else a CPU talks to
+
 If you already know chapter 1's vocabulary cold, skip straight to
 chapter 2 — it's there for the same reason
 [Chapter 0 of Async Rust](../async-rust/00-is-it-in-the-language-or-not.md)

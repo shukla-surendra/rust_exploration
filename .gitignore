@@ -6,3 +6,15 @@
 *.db
 */.DS_Store
 */book/*
+
+# Compiled assembly output — asm_examples/ should only ever track
+# source (.s), linker scripts (.ld), companion scripts (.py), and docs.
+*.o
+*.elf
+*.out
+asm_examples/**/*
+!asm_examples/**/*.s
+!asm_examples/**/*.ld
+!asm_examples/**/*.py
+!asm_examples/**/*.md
+!asm_examples/*/
