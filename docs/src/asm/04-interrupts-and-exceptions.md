@@ -1,8 +1,41 @@
 # 4. Interrupts & Exceptions: IDT vs Exception Vector Table
 
+## Before the IDT: the real-mode IVT
+
+Every x86 CPU begins here, not at the IDT — **the reset vector**,
+`0xFFFF0`, hardwired into the CPU itself; the very first instruction
+executed after power-on or reset lives there (inside BIOS ROM, mapped
+at the top of the 20-bit real-mode address space). BIOS code running
+from that point sets up a much older, simpler table before anything
+else: the **Interrupt Vector Table (IVT)**, at physical address
+`0x00000`.
+
+- 256 entries, 4 bytes each (2-byte `IP` + 2-byte `CS`) = 1 KB total,
+  occupying `0x00000`–`0x003FF`.
+- No `lidt`/pointer indirection needed — the table's address is fixed
+  at `0x0000:0x0000` by convention, and looking up interrupt `N` is
+  just `N × 4` (e.g. `INT 0x10`, video services, → offset `0x40`).
+  That's *why* it lives at the very bottom of memory: the math is
+  trivial hardware logic, not a design choice with alternatives.
+- On power-on the IVT is empty; BIOS fills it during POST with
+  handlers for hardware IRQs and software services (`INT 0x10` video,
+  `INT 0x13` disk, `INT 0x16` keyboard) — this is how 16-bit real-mode
+  code (the boot sector, DOS) talks to hardware without touching
+  device registers directly, the real-mode equivalent of a driver API.
+
+The IVT only exists in **16-bit real mode** — the mode every x86 CPU
+boots into before anything switches it to protected/long mode. Once
+[Chapter 5's boot sector](../systems/05-boot-process-bios-uefi.md) code
+(or a Stage 2 loader) makes that switch, the IVT is abandoned entirely
+in favor of the IDT below — a different table, a different format,
+loaded explicitly via `lidt` instead of assumed at a fixed address.
+
 ## x86-64: the IDT, one entry per interrupt number
 
-The **IDT** (Interrupt Descriptor Table) is a 256-entry table; entry
+Once the CPU leaves real mode, interrupt dispatch moves from the
+fixed-address IVT above to this software-configured table — same
+underlying job, entirely different mechanism. The **IDT** (Interrupt
+Descriptor Table) is a 256-entry table; entry
 `N` points at the handler for interrupt/exception number `N` (divide
 error is 0, page fault is 14, syscall is conventionally 128/`0x80` or
 handled via `syscall`/`sysret` instead — see

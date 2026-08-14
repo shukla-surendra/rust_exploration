@@ -23,6 +23,47 @@ that don't: Cargo.toml anatomy, attributes, and macros.
 | `cargo add foo` | add a dependency | `pip install foo` (but writes it to `Cargo.toml` too) |
 | `cargo check` | type-check without producing a binary — much faster than `build` | closest to a Python linter/type-checker pass |
 
+## What `cargo build` actually runs: `rustc` → LLVM
+
+`cargo build` doesn't compile Rust straight to machine code in one
+step — `rustc` translates your code into **LLVM IR** (a lower-level,
+architecture-independent instruction format), then hands that IR to
+**LLVM**, a separate compiler-infrastructure project originally built
+for C/C++ (via Clang), which optimizes it and generates the actual
+machine code for whatever target you asked for:
+
+```
+Rust source → rustc (frontend) → LLVM IR → LLVM optimizer passes → target backend → machine code
+```
+
+This is why Rust can target so many architectures without `rustc`
+itself knowing anything about x86 vs ARM instruction encoding — that's
+LLVM's job, and it's the same IR/backend split Clang, Swift, and others
+share. It's also where a couple of OS-dev-specific tools come from:
+`llvm-tools-preview` (`rustup component add llvm-tools-preview`)
+installs `llvm-objcopy`/`llvm-nm`/`llvm-size`, LLVM's own
+binary-inspection utilities, needed to reshape a compiled kernel ELF
+into whatever raw format a bootloader expects.
+
+## `rustup`: stable vs nightly, and why OS dev often needs nightly
+
+```sh
+rustc --version                 # which toolchain is active right now
+rustup default nightly          # switch the global default
+rustup override set nightly     # switch only inside the current directory
+cargo +nightly build            # override for one command, no lasting change
+```
+
+Ordinary application code stays on **stable** — nightly ships unstable,
+occasionally-breaking features in exchange for being ahead of stable's
+release cadence. Bare-metal/kernel code is one of the few cases that
+routinely needs nightly anyway: building `core`/`alloc` from source for
+a custom target (`-Z build-std`, unstable) and some `asm!`-related
+refinements are nightly-gated. Convention: leave the *global* default
+on stable, and use `rustup override set nightly` inside the kernel
+project's own directory — everything else on the machine keeps using
+stable untouched.
+
 ## `Cargo.toml` anatomy
 
 ```toml
@@ -44,6 +85,27 @@ same compiler and can even be mixed across dependencies in one build.
 `Cargo.lock` (analogous to `package-lock.json`/`poetry.lock`) pins exact
 resolved versions for reproducible builds — commit it for binaries,
 same convention as those ecosystems.
+
+## Crate vs package — two different units
+
+`cargo new foo` creates a **package** — a directory with one
+`Cargo.toml`, holding one or more **crates**:
+
+- **Binary crate** — an executable; needs an entry point (`fn main()`,
+  or `_start` in `#![no_std]`/bare-metal code — see
+  [`hello-kernel`](../systems/08-hello-kernel-build-and-linking.md)).
+  `src/main.rs` is the binary crate root.
+- **Library crate** — no entry point, just types/functions other
+  crates depend on (`src/lib.rs` is the root). `cargo new foo --lib`
+  scaffolds one directly.
+
+A package can hold **zero or one** library crate plus **any number of**
+binary crates (`src/bin/*.rs` adds more). `crate` is the unit `rustc`
+actually compiles one at a time; `package` is the unit `Cargo.toml`
+manages — a dependency in `[dependencies]` is pulling in someone else's
+crate, packaged the same way. Analogy: a crate is a book, a package is
+a bookshelf with one catalog (`Cargo.toml`) that can hold more than one
+book.
 
 ## Modules — organizing code within a crate
 
@@ -100,6 +162,7 @@ Frequent ones:
 | `#[cfg(...)]` | conditional compilation — `#[cfg(test)]`, `#[cfg(target_os = "linux")]`, etc. |
 | `#[allow(...)]` / `#[warn(...)]` / `#[deny(...)]` | tune compiler lint behavior for the item below |
 | `#[test]` | mark a test function |
+| `#[inline]` | hint the compiler to substitute the function body at each call site instead of emitting a `call` — cuts call overhead for small hot functions (a single-instruction port-I/O wrapper, say — see [I/O Ports & MMIO](../asm/11-io-ports-and-mmio.md)), at the cost of code size if overused |
 
 ## Macros — code that generates code
 
@@ -113,3 +176,8 @@ macros; writing your own (`macro_rules! my_macro { ... }`, or a
 procedural/derive macro) is a rare, advanced need — recognizing that
 `!` means "this is a macro, not a function, and can do things a function
 signature couldn't express" is the useful takeaway for a refresher pass.
+
+`core::arch::asm!` (the inline-assembly macro — see
+[I/O Ports & MMIO](../asm/11-io-ports-and-mmio.md)) is the same story:
+a macro, not a function, expanding to raw instructions at compile time
+rather than generating a function call.

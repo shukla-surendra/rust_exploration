@@ -21,11 +21,16 @@ is "vectorization," and Rust's `std::simd` (nightly) or the
 `std::arch::x86_64`/`std::arch::aarch64` intrinsics modules are the
 natural entry point from where this section leaves off.
 
-**Assembler macros, `.if`/`.endif` conditional assembly, and linker
-scripts** — real tools for larger assembly projects, left out because
-nothing in this section's examples was large enough to need them. Once
-you're writing more than a screen or two of hand-written assembly at a
-time, they're worth a look.
+**Assembler macros and `.if`/`.endif` conditional assembly** — real tools
+for larger assembly projects, left out of the guided path because nothing
+up to this point was large enough to need them.
+[Chapter 20](./20-macros-and-a-vm-project.md) covers both directly, plus
+the flags-register depth `mul`/`imul`/`div`/`idiv` need and the full
+`ja`/`jg`/`cmov` conditional-jump family, building toward a small
+hand-assembled bytecode VM — genuinely large enough to need macros.
+**Linker scripts** are the one item here still left uncovered; once you're
+writing more than a screen or two of hand-written assembly at a time,
+they're worth a look.
 
 **Windows** — genuinely a fifth combination this section skipped, since
 the Mac-with-Docker workflow in [Chapter 2](./02-toolchain-setup.md)

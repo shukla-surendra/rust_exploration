@@ -140,6 +140,7 @@
   - [17. Mini Projects](./asm-zero-to-hero/17-mini-projects.md)
   - [18. Where to Go Next](./asm-zero-to-hero/18-where-to-go-next.md)
   - [19. Full Instruction Reference](./asm-zero-to-hero/19-instruction-reference.md)
+  - [20. Macros, Flags in Depth & a Capstone VM](./asm-zero-to-hero/20-macros-and-a-vm-project.md)
 
 - [Assembly for OS Development]()
   - [Overview](./asm/00-overview.md)

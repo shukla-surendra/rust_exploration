@@ -88,6 +88,11 @@ output before being written down.
 19. [Full Instruction Reference](./19-instruction-reference.md) — every
     general-purpose integer instruction from both architectures, one
     lookup table, organized by category
+20. [Macros, Flags in Depth & a Capstone VM](./20-macros-and-a-vm-project.md) —
+    the one thing [Chapter 18](./18-where-to-go-next.md) said this section
+    left out (assembler macros), plus the flags-register mechanics behind
+    `mul`/`imul`/`div`/`idiv` and the full `ja`/`jg`/`cmov` jump family,
+    building toward a tiny hand-assembled bytecode VM
 
 ## How this differs from the other assembly section in this book
 

@@ -11,7 +11,11 @@ system uses.
 
 1. BIOS loads the very first sector of the chosen disk — LBA 0, 512
    bytes (chapter 2's addressing) — into memory at a fixed address
-   (`0x7C00`).
+   (`0x7C00`). Before this step, BIOS already set up the **Interrupt
+   Vector Table** at physical address `0x00000` — see
+   [Interrupts & Exceptions](../asm/04-interrupts-and-exceptions.md#before-the-idt-the-real-mode-ivt)
+   for what that table is and why the boot sector's `INT 0x13` disk
+   calls (below) work at all.
 2. It checks the **last two bytes** of that sector. They must be the
    signature `0x55AA`.
 3. If valid → BIOS runs the bootloader code from that sector. If
@@ -39,6 +43,83 @@ exactly the two bytes BIOS checks. A real BIOS, pointed at this
 `disk.img`, would consider it bootable purely because of these two
 bytes being correct; nothing else about the sector's contents matters
 for that specific check.
+
+## Stage 1 vs Stage 2 — why boot code is almost never just 446 bytes
+
+The BIOS+MBR flow above only guarantees **one thing gets loaded**: 512
+bytes, executed in 16-bit real mode, with no filesystem driver, no
+`malloc`, nothing but raw BIOS interrupts. 446 bytes of actual code
+(bytes `0`–`445`, before the partition table at `0x1BE`) is nowhere
+near enough to understand a real filesystem and locate a
+multi-megabyte kernel file on it by name. Real bootloaders solve this
+by chaining two stages:
+
+- **Stage 1** — exactly what's described above: lives in the MBR's 446
+  code bytes, has one job, load a larger **Stage 2** image from a
+  known disk location into memory, then jump to it.
+- **Stage 2** — no longer size-constrained, so it can carry a real
+  filesystem driver (FAT, ext2), present a boot menu, and load the
+  actual OS kernel by filename rather than raw sector number.
+
+GRUB is the most common Stage 2 loader in practice — installing it
+writes a tiny Stage 1 into the MBR and a much larger Stage 2 (with
+filesystem support) elsewhere on disk, which is why GRUB installs need
+free space right after the MBR on BIOS-booted disks (the "BIOS boot
+partition" convention, even on otherwise-GPT disks).
+
+## A third loading mechanism: Multiboot2
+
+BIOS+MBR (above) and UEFI+GPT (below) both answer "how does firmware
+find and start *something*." **Multiboot2** answers a narrower
+question one level up: once a Stage 2 loader like GRUB is already
+running, how does *it* recognize a raw kernel binary as bootable and
+know where to jump?
+
+GRUB scans the **first 32 KiB** of whatever file it loads (typically
+the kernel's own ELF) for a specific header:
+
+```
+magic:    0xE85250D6          (4 bytes, little-endian)
+arch:     0  (x86, 32-bit protected mode) or 4 (MIPS)
+len:      total header size in bytes, including all tags
+checksum: computed so magic + arch + len + checksum ≡ 0 (mod 2^32)
+...tags...
+end tag:  type = 0, size = 8
+```
+
+If the magic and checksum check out, GRUB treats the file as
+Multiboot2-capable and jumps to its entry point after setting up a
+defined machine state (protected mode, a stack, a memory map handed to
+the kernel) — no BIOS interrupts needed from that point on, since GRUB
+already did the filesystem/loading work Stage 1 alone couldn't. In
+Rust, this header is just **data**, emitted as a `static`, never
+executed — three attributes make that placement correct:
+
+```rust
+#[unsafe(no_mangle)]
+#[unsafe(link_section = ".multiboot2")]
+#[used]
+pub static MULTIBOOT2_HEADER: MbHeader = MbHeader { /* fields as above */ };
+```
+
+- `#[unsafe(no_mangle)]` — conventional here, though GRUB finds this
+  particular static by scanning raw bytes for the magic number, not by
+  symbol name.
+- `#[unsafe(link_section = ".multiboot2")]` — without this, the linker
+  is free to place the static anywhere, including well past the first
+  32 KiB GRUB actually scans; a linker script `KEEP(*(.multiboot2))`
+  placed before `.text` is what guarantees it lands early enough.
+- `#[used]` — the header is never read by the kernel's own Rust code,
+  only by GRUB externally, so without this the compiler would see an
+  unreferenced `static` and legitimately optimize it away entirely.
+
+This is the same `#[unsafe(no_mangle)]`/`#[unsafe(link_section)]`/
+`#[used]` combination
+[OxideOS's Limine boot process](../oxideos/oxide_cocepts/01_boot_process.md)
+uses for its own, different bootloader request protocol — same
+underlying problem (getting the linker and a scanning bootloader to
+agree on where a data structure lives), different specific bootloader
+and header format.
 
 ## UEFI + GPT (the modern scheme)
 

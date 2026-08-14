@@ -6,7 +6,7 @@ Modern operating systems require a graphical user interface (GUI). OxideOS imple
 
 ### Layer 1: The Linear Framebuffer
 
-The very foundation of OxideOS's graphical system is the **linear framebuffer**. Instead of wrestling with complex, outdated VGA text modes, OxideOS takes a modern approach: it requests a simple, contiguous block of memory from the Limine bootloader using a `FramebufferRequest` (as seen in Chapter 1).
+The very foundation of OxideOS's graphical system is the **linear framebuffer**. Instead of wrestling with complex, outdated VGA text modes (see [Assembly for OS Development](../../asm/00-overview.md) for what that classic `0xB8000` text-buffer approach actually looks like, and why OxideOS skips it), OxideOS takes a modern approach: it requests a simple, contiguous block of memory from the Limine bootloader using a `FramebufferRequest` (as seen in Chapter 1).
 
 *   **Concept**: This special memory region is directly mapped to your computer screen. Imagine it as a giant grid where each tiny square (a pixel) on your screen corresponds to a specific set of bytes in this memory block. To draw anything, the kernel simply writes color values to the correct memory addresses within this framebuffer. It's like painting directly onto the screen's memory.
 *   **Pixel Format**: OxideOS typically uses a 32-bit color format, often ARGB (Alpha, Red, Green, Blue) or XRGB. In this format, each of the four color components (or three, plus an unused "X" byte) gets 8 bits, allowing for over 16 million different colors per pixel.

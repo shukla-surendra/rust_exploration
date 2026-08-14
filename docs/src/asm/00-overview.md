@@ -90,6 +90,84 @@ firmware service," it's specifically the board/system-firmware layer
 (or the boot-ROM/embedded-coprocessor layer providing PSCI on ARM) —
 not something baked into every CPU unconditionally.
 
+## A third bootstrapping path neither project here uses
+
+The two case studies above cover two real approaches: `hello-kernel`
+gets loaded directly by QEMU's `-kernel` flag (no bootloader at all —
+[Systems, Chapter 9](../systems/09-hello-kernel-boot-to-execution.md)),
+and OxideOS is loaded by **Limine**, a modern bootloader using its own
+request/response protocol
+([OxideOS Concepts, Chapter 1](../oxideos/oxide_cocepts/01_boot_process.md)).
+A third path is common enough in Rust OS-dev tutorials to be worth
+naming even though it's not used here: the **`bootloader` crate +
+`bootimage`** combination (the approach the well-known "Writing an OS
+in Rust" blog series uses).
+
+**A custom target spec instead of a built-in triple.** `hello-kernel`
+([Systems, Chapter 8](../systems/08-hello-kernel-build-and-linking.md))
+uses `aarch64-unknown-none`, a target triple `rustc` already ships. x86
+bare-metal projects following the `bootloader`/`bootimage` path instead
+write their own target as JSON — there's no built-in "no bootloader, no
+libc, raw x86_64" triple:
+
+```json
+{
+  "llvm-target": "x86_64-unknown-none",
+  "arch": "x86_64",
+  "os": "none",
+  "executables": true,
+  "linker-flavor": "ld.lld",
+  "panic-strategy": "abort",
+  "disable-redzone": true,
+  "features": "-mmx,-sse,+soft-float",
+  "relocation-model": "static"
+}
+```
+
+Building against a custom target means `core`/`alloc` don't exist
+precompiled for it — they have to be built from source alongside your
+own code, which is what the unstable `-Z build-std=core,alloc` flag
+(and a **nightly** toolchain — see
+[Cargo, Modules, Testing & Macros](../workbook/10-cargo-modules-testing-macros.md))
+is for.
+
+**`bootimage` — a linking step neither case study here needs.** Plain
+`cargo build` against a target like the one above produces a `.elf` —
+not directly bootable by BIOS. The `bootimage` crate (`cargo install
+bootimage`) combines that ELF with the `bootloader` crate (a real,
+from-scratch Stage 1 + Stage 2 BIOS bootloader, written in Rust,
+implementing exactly the
+[Stage 1/Stage 2 split](../systems/05-boot-process-bios-uefi.md)
+described in Systems chapter 5) into one flat `.bin` image BIOS can
+actually load. `cargo bootimage && qemu-system-x86_64 -drive
+format=raw,file=<image>.bin` then runs it — no `-kernel` flag, because
+there's a real bootloader in the loop this time, unlike `hello-kernel`.
+
+**The VGA text buffer — the classic alternative to UART output.** Where
+`hello-kernel`
+([Systems, Chapter 10](../systems/10-hello-kernel-uart-and-panics.md))
+writes bytes to a UART register, BIOS-era x86 has a second option with
+no wiring required at all: text written to physical address `0xB8000`
+appears directly on screen, 2 bytes per character (1 ASCII byte + 1
+color-attribute byte), in an 80×25 grid the BIOS already initialized
+before handing off control:
+
+```rust
+let vga_buffer = 0xb8000 as *mut u8;
+let msg = b"Hello World from Rust OS!";
+for (i, &b) in msg.iter().enumerate() {
+    unsafe {
+        *vga_buffer.add(i * 2) = b;           // ASCII byte
+        *vga_buffer.add(i * 2 + 1) = 0x0F;    // white on black
+    }
+}
+```
+
+OxideOS deliberately skips this in favor of a real linear framebuffer —
+see [Graphics & GUI](../oxideos/oxide_cocepts/05_graphics_and_gui.md)
+for why pixel-level graphics needs a different approach than 80×25 text
+cells.
+
 ## Prerequisites
 
 - [Ownership, Borrowing & Lifetimes](../workbook/02-ownership-borrowing-lifetimes.md) —
