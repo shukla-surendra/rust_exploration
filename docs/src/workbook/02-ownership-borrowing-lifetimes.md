@@ -1,149 +1,164 @@
 # 2. Ownership, Borrowing & Lifetimes
 
-**What this replaces:** nothing — this is the concept with no Python or
-Java equivalent, and the one most likely to have faded between Rust
-sessions. Budget real time here; everything else in the language is
-comparatively familiar syntax.
+No Python/Java equivalent — this is the concept most likely to have faded
+between sessions, so budget real time here. 14 rules, 4 small groups. Scan
+the table, then read only the cards for rules you're shaky on. Each card
+is self-contained: **rule → code → why** — you don't need the others open
+to understand one.
 
-## The problem both languages you know solve with a GC
+## The mental model
 
-Python and Java both let you hand the same object to multiple variables
-freely, and a garbage collector figures out later when nothing points to
-it anymore and frees it:
+Python/Java: a garbage collector frees memory whenever nothing points to
+it anymore — you don't track this yourself.
 
 ```python
 a = [1, 2, 3]
 b = a            # both names point at the same list
-b.append(4)      # a sees this too — same object
+b.append(4)      # a sees this too
 ```
 
-Rust has no garbage collector. Instead, it tracks **who owns each
-value** at compile time, and frees memory deterministically the instant
-the owner goes out of scope — no runtime GC pause, no "when exactly does
-this get freed" uncertainty. The rules that make this possible are what
-this chapter covers.
+Rust: no GC. Instead, every value has exactly one **owner**, tracked at
+*compile time*, and it's freed the instant that owner goes out of scope.
+The 14 rules below are just this one idea, worked out into every corner
+it touches.
 
-## Rule 1: every value has exactly one owner
+## Quick reference
+
+| # | Ownership | | # | Borrowing |
+|---|---|---|---|---|
+| 1 | Every value has exactly one owner | | 6 | `&T`/`&mut T` use a value without owning it |
+| 2 | Owner out of scope → value dropped | | 7 | Any number of `&T`, **or** one `&mut T` — never both |
+| 3 | Moving a non-`Copy` value invalidates the old binding | | 8 | A borrow ends at last use, not `{ }` end (NLL) |
+| 4 | `Copy` types duplicate instead of moving | | 9 | Slices (`&[T]`, `&str`) borrow *part* of a collection |
+| 5 | Moving one field = partial move; other fields still usable | | | |
+
+| # | Lifetimes | | # | Escape valve |
+|---|---|---|---|---|
+| 10 | A reference can't outlive its value | | 14 | Rules 1 & 7 too strict? `Rc`/`Arc` (shared owner), `RefCell`/`Cell` (check moves to runtime) |
+| 11 | Lifetimes are compile-time labels, mostly inferred | | | |
+| 12 | A struct holding a reference needs a lifetime param | | | |
+| 13 | `'static` = valid for whole program | | | |
+
+---
+
+## Ownership (1–5)
+
+### Rules 1–2: one owner, freed on scope exit
+
+**Assigning a non-`Copy` value moves ownership; the old binding dies.**
 
 ```rust
 let a = String::from("hello");
-let b = a;          // ownership MOVES from a to b
+let b = a;          // ownership MOVES a → b
 println!("{a}");    // COMPILE ERROR: value borrowed after move
 ```
 
-This is the line that surprises everyone coming from Python. `b = a`
-doesn't copy the string and doesn't create a second reference to the
-same data the way Python's `b = a` does — it **transfers ownership**.
-After the move, `a` is no longer valid; the compiler enforces this
-statically, so there's no way to accidentally use a value that's been
-"given away." Only one owner can exist at any point, and when that owner
-goes out of scope, the value is dropped (freed) automatically.
+**Why:** unlike Python's `b = a`, this isn't a second reference to the
+same object — `a` is gone. When `b` later goes out of scope, Rust frees
+the string automatically. No GC, no `free()`.
 
-**Types that don't move, they copy:** simple stack-only types (`i32`,
-`f64`, `bool`, `char`, tuples of these) implement `Copy` — `let b = a;`
-duplicates the value instead of moving it, and `a` stays valid. This is
-why `let x = 5; let y = x; println!("{x}");` compiles fine but the
-`String` version above doesn't — `i32` is `Copy`, `String` isn't (it
-owns a heap allocation, and heap-owning types generally can't be
-implicitly duplicated — see [Stack vs Heap](../foundation/stack-vs-heap.md)).
-
-## Rule 2: you can borrow a value without taking ownership
-
-Moving everything everywhere would be unworkable — you need to pass
-values to functions and get them back. **References** (`&`) let you
-*borrow* a value temporarily without taking ownership:
-
-```rust
-fn print_it(s: &String) {   // borrows, doesn't take ownership
-    println!("{s}");
-}
-
-let a = String::from("hello");
-print_it(&a);       // lend a reference
-print_it(&a);        // a is still valid — can lend it again
-```
-
-Compare the version *without* `&`:
+### Rule 3: passing into a function moves too
 
 ```rust
 fn print_it(s: String) { println!("{s}"); }
 
 let a = String::from("hello");
-print_it(a);         // ownership moves into the function...
-print_it(a);          // COMPILE ERROR: a was already moved, it's gone
+print_it(a);   // moves in
+print_it(a);   // COMPILE ERROR: a was already moved
 ```
 
-This is the mechanical reason so many Rust function signatures take
-`&String`/`&str`/`&[T]` rather than owned types — see
-[Dereferencing](../foundation/dereferencing.md) for the `*`/`Deref` side
-of working with references, and [CLI Implementation](../foundation/cli.md)
-for `&[String]` used this exact way in `rgrep`.
+### Rule 4: `Copy` types duplicate instead
 
-## Rule 3: many readers, XOR one writer — enforced at compile time
+```rust
+let x = 5;
+let y = x;
+println!("{x}");   // fine — i32 is Copy
+```
+
+**Why:** plain stack data (`i32`, `f64`, `bool`, `char`, tuples of these)
+has no heap pointer to worry about sharing, so it's cheap to duplicate
+implicitly. `String` owns a heap allocation, so it isn't `Copy` —
+`.clone()` (`Clone` trait) is the *explicit* opt-in version for types too
+expensive to duplicate silently.
+→ [Stack vs Heap](../foundation/stack-vs-heap.md), [Traits](../foundation/traits.md)
+
+### Rule 5: partial moves
+
+```rust
+struct Pair { a: String, b: String }
+
+let p = Pair { a: String::from("x"), b: String::from("y") };
+let a = p.a;              // moves just `a` out
+println!("{}", p.b);      // fine — b untouched
+println!("{}", p.a);      // COMPILE ERROR — p.a already moved
+```
+
+**Why:** the compiler tracks moves per field, but only while you hold the
+owned value directly — through `&self` you don't get this, use
+`Some(ref mut n)` instead.
+→ [Structs & Methods](../foundation/structs-and-methods.md#self-referential-structs-optionboxself)
+
+## Borrowing (6–9)
+
+### Rule 6: borrow instead of move
+
+```rust
+fn print_it(s: &String) { println!("{s}"); }  // borrows
+
+let a = String::from("hello");
+print_it(&a);   // lend
+print_it(&a);   // a still valid — lend again
+```
+
+**Why:** this is why most Rust signatures take `&String`/`&str`/`&[T]`
+rather than owned types. → [Dereferencing](../foundation/dereferencing.md)
+
+### Rule 7: many readers, XOR one writer
 
 ```rust
 let mut s = String::from("hello");
-
-let r1 = &s;         // ok
-let r2 = &s;          // ok — multiple immutable borrows are fine
+let r1 = &s;          // ok
+let r2 = &s;          // ok — many immutable borrows fine
 println!("{r1} {r2}");
-
-let r3 = &mut s;      // COMPILE ERROR if r1/r2 are still in use:
-                       // cannot borrow `s` as mutable because it's also borrowed as immutable
+let r3 = &mut s;       // COMPILE ERROR while r1/r2 are still live
 ```
 
-At any given point, a value can have **either** any number of immutable
-borrows (`&T`) **or exactly one** mutable borrow (`&mut T`) — never
-both, never more than one mutable borrow. This is the rule that prevents
-a whole category of bugs Python and Java both allow at runtime: one part
-of your code mutating a collection while another part is iterating over
-it (Python: `RuntimeError: dictionary changed size during iteration`,
-caught at runtime, if you're lucky enough to hit it; Rust: caught before
-the program ever runs).
+**Why:** this rule *is* "the borrow checker" — not a separate tool, just
+the compiler proving this invariant statically. Its errors name the
+conflicting borrow and point at where each one starts; the fix is almost
+always "shorten one borrow's lifetime."
+
+### Rule 8: a borrow ends at last use (NLL)
 
 ```rust
-let mut v = vec![1, 2, 3];
-for x in &v {
-    v.push(*x);   // COMPILE ERROR — can't mutate v while r (the iterator) borrows it
-}
+let mut s = String::from("hello");
+let r1 = &s;
+println!("{r1}");      // last use — r1's borrow ends HERE
+let r3 = &mut s;        // fine — r1 is already done
 ```
 
-## What "the borrow checker" actually is
+**Why:** the compiler tracks *actual last use*, not the enclosing `{ }`
+block — this is why the example above compiles.
 
-There's no separate tool — it's part of the compiler. When you hit a
-message like `cannot borrow ... as mutable more than once`, that's the
-compiler statically proving your code would otherwise violate rule 3.
-The unfamiliar part isn't the rule itself (both Python and Java code
-*try* to avoid "mutate while iterating" bugs already, by convention) —
-it's that Rust **refuses to compile** rather than letting you find out
-at runtime.
+### Rule 9: slices borrow part of a collection
 
-### Reading a borrow-checker error
-
-```
-error[E0502]: cannot borrow `s` as mutable because it is also borrowed as immutable
-  --> src/main.rs:5:14
-   |
-3  |     let r1 = &s;
-   |              -- immutable borrow occurs here
-4  |     println!("{r1}");
-5  |     let r3 = &mut s;
-   |              ^^^^^^ mutable borrow occurs here
+```rust
+let v = vec![1, 2, 3, 4, 5];
+let middle: &[i32] = &v[1..3];   // borrows elements 1..3, no copy
 ```
 
-Read bottom to top: it names the conflicting borrow, points at exactly
-where each one starts, and (usually) suggests a fix. The fix is almost
-always "shorten one borrow's lifetime" — e.g. move the `println!` after
-the `let r3` line isn't possible here, but ending `r1`/`r2`'s usage
-before line 5 (which the compiler tracks automatically based on last
-use, not lexical scope — see "non-lexical lifetimes" below) resolves it.
+**Why:** `&str`/`&[T]` are "fat pointers" (pointer + length) — same idea
+as Rule 6, applied to a range instead of a whole value.
+→ [CLI Implementation](../foundation/cli.md), [Strings](../foundation/strings.md)
 
-## Lifetimes — naming *how long* a reference is valid
+## Lifetimes (10–13)
 
-A reference can never outlive the value it points to (an obvious rule —
-the alternative is a dangling pointer). Most of the time the compiler
-infers this without you writing anything. Occasionally, usually in
-function signatures returning a reference, it needs help:
+### Rule 10: a reference can't outlive its value
+
+The obvious one — the alternative is a dangling pointer. The compiler
+enforces it without you writing anything, most of the time.
+
+### Rule 11: lifetimes are compile-time labels, mostly inferred
 
 ```rust
 fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {
@@ -151,59 +166,60 @@ fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {
 }
 ```
 
-`'a` (read "tick-a," or "lifetime a") isn't a runtime value — it's a
-compile-time label saying "the reference this function returns lives no
-longer than the *shorter* of `x` and `y`'s lifetimes." Without it, the
-compiler can't tell which input the output reference is tied to (could
-be either `x` or `y`), and can't verify the caller won't use the result
-after one of the inputs is gone. You already have this in the codebase:
+**Why:** `'a` isn't a runtime value — it's a label meaning "the returned
+reference lives no longer than the shorter of `x`, `y`." **Elision**
+handles the common case for free: `fn first_word(s: &str) -> &str` needs
+no annotation, because "one input ref, one output ref → assume they're
+tied" is already a rule the compiler applies. You write `'a` explicitly
+only when there are multiple input refs and the compiler can't guess
+which one the output relates to, as above.
+
+### Rule 12: a struct holding a reference needs a lifetime param
 
 ```rust
-pub fn search<'a>(pattern: &str, contents: &'a str) -> Vec<&'a str> {
-    // ...
-}
+struct Excerpt<'a> { part: &'a str }
+
+let novel = String::from("Call me Ishmael...");
+let first_sentence = novel.split('.').next().unwrap();
+let excerpt = Excerpt { part: first_sentence };
+// excerpt can't outlive novel — Rule 10, one level up
 ```
 
-`search`'s `'a` says "every `&str` in the returned `Vec` borrows directly
-from `contents`, and is only valid as long as `contents` is" — see
-[Dereferencing](../foundation/dereferencing.md) for `search`'s full
-context in `rgrep`. Note `pattern` has no lifetime annotation needed —
-it isn't part of what gets returned, so there's nothing to tie it to.
+**Why:** without `'a`, Rust can't tell how long the reference stored
+inside the struct needs to stay valid, and refuses to compile.
 
-**Lifetime elision** — the common cases don't need `'a` written out at
-all. `fn first_word(s: &str) -> &str` compiles with no annotations
-because the compiler applies a rule: "one input reference, one output
-reference → assume they're tied together." You mostly only write
-explicit lifetimes when there are multiple input references and the
-compiler can't guess which one the output relates to (like `longest`
-above).
-
-## Non-lexical lifetimes: borrows end at last use, not end of scope
+### Rule 13: `'static` — valid for the whole program
 
 ```rust
-let mut s = String::from("hello");
-let r1 = &s;
-println!("{r1}");      // last use of r1 — its borrow effectively ends HERE
-let r3 = &mut s;        // fine — r1's borrow is already over
+let s: &'static str = "hello";   // string literals are 'static
 ```
 
-Modern Rust (since the 2018 edition) tracks a borrow's actual last use,
-not its enclosing `{ }` block — this is why the example above compiles
-even though `r1` is lexically still "in scope" when `r3` is created.
-This is a frequent source of "wait, I thought this would error" pleasant
-surprises once you're used to the older, stricter mental model.
+**Why:** literals are compiled into the binary, not allocated at
+runtime — nothing can free them out from under the reference. Also shows
+up in trait-object bounds (`Box<dyn Error + 'static>`) and
+`thread::spawn`, which requires `'static` because a spawned thread might
+outlive the function that started it. → [Concurrency](./08-concurrency.md)
 
-## The payoff: why bother with all this
+## The escape valve (14)
 
-- **No garbage collector** — no GC pause, ever, and memory is freed the
-  instant an owner's scope ends, deterministically (see `Drop` in
-  [Traits](../foundation/traits.md)).
-- **No data races, at compile time** — the "many readers XOR one writer"
-  rule is exactly what prevents two threads from mutating the same data
-  simultaneously without synchronization; see
-  [Concurrency](./08-concurrency.md), where the same rule is enforced
-  across threads via `Send`/`Sync`, not just within one.
-- **No use-after-free, no double-free, no null-pointer dereference** —
-  categories of bugs that are runtime crashes (or worse, silent
-  corruption) in C, and that Python/Java avoid via GC + runtime checks
-  (`NullPointerException`) instead of preventing at compile time.
+Rules 1 & 7 (one owner, one writer XOR many readers) are sometimes
+genuinely too strict — a graph with shared child nodes, a cache read from
+multiple places. Rust makes you opt in explicitly rather than relaxing
+the rule:
+
+- `Rc<T>` / `Arc<T>` — shared ownership
+- `RefCell<T>` / `Cell<T>` — moves the borrow check from compile time to
+  *runtime* (panics instead of refusing to compile)
+
+→ full treatment + `Rc<RefCell<T>>` decision table:
+[Memory & Smart Pointers](./07-memory-and-smart-pointers.md)
+
+## Why bother
+
+- **No GC pause** — memory frees deterministically at scope exit
+  (`Drop`, → [Traits](../foundation/traits.md))
+- **No data races, at compile time** — Rule 7, enforced across threads
+  too via `Send`/`Sync` (→ [Concurrency](./08-concurrency.md))
+- **No use-after-free / double-free / null deref** — runtime crashes in
+  C, GC + `NullPointerException` band-aids in Python/Java, compile errors
+  here
