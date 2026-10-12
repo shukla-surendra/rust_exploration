@@ -1,5 +1,7 @@
 # Summary
 
+[Introduction](./introduction.md)
+
 - [Rust Refresher Workbook]()
   - [How to use this](./workbook/00-how-to-use.md)
   - [1. Syntax & Control Flow](./workbook/01-basics-and-control-flow.md)

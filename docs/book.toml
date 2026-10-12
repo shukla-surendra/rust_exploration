@@ -1,6 +1,20 @@
 [book]
-title = "rust_exploration notes"
+title = "Rust Exploration"
+description = "A hands-on Rust tutorial: from syntax and ownership to async, production Rust, assembly, embedded and OS development."
+authors = ["Surendra Shukla"]
+language = "en"
 src = "src"
 
 [output.html]
 default-theme = "light"
+preferred-dark-theme = "ayu"
+site-url = "/rust_exploration/"
+git-repository-url = "https://github.com/shukla-surendra/rust_exploration"
+edit-url-template = "https://github.com/shukla-surendra/rust_exploration/edit/master/docs/{path}"
+
+[output.html.search]
+enable = true
+
+[output.html.playground]
+runnable = true
+copyable = true
