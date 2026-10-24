@@ -1,20 +1,17 @@
-*/target/*
-*/*/target/*
-*/.idea/*
-.idea/*
-*/*/.idea/*
+**/target/
+**/.idea/
 *.db
-*/.DS_Store
-*/book/*
+**/.DS_Store
+**/book/
 
-# Compiled assembly output — asm_examples/ should only ever track
+# Compiled assembly output — archive/asm_examples/ should only ever track
 # source (.s), linker scripts (.ld), companion scripts (.py), and docs.
 *.o
 *.elf
 *.out
-asm_examples/**/*
-!asm_examples/**/*.s
-!asm_examples/**/*.ld
-!asm_examples/**/*.py
-!asm_examples/**/*.md
-!asm_examples/*/
+archive/asm_examples/**/*
+!archive/asm_examples/**/*.s
+!archive/asm_examples/**/*.ld
+!archive/asm_examples/**/*.py
+!archive/asm_examples/**/*.md
+!archive/asm_examples/*/
