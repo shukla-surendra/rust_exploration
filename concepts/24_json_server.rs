@@ -2,11 +2,11 @@
 //! (no cargo, no serde). It shows how a client deals with JSON that has
 //! null values, missing fields, wrong types, bad values and extra fields.
 //!
-//! Build:  rustc json_server.rs --edition 2024
-//! Run:    ./json_server server                 (terminal 1)
-//!         ./json_server client 4               (terminal 2, lenient parsing)
-//!         ./json_server client 5 --strict      (reject anything unexpected)
-//!         ./json_server client all             (run every scenario)
+//! Build:  rustc 24_json_server.rs --edition 2024
+//! Run:    ./24_json_server server                 (terminal 1)
+//!         ./24_json_server client 4               (terminal 2, lenient parsing)
+//!         ./24_json_server client 5 --strict      (reject anything unexpected)
+//!         ./24_json_server client all             (run every scenario)
 //!         curl -i 'http://127.0.0.1:8080/user?id=4'
 //!
 //! Scenarios served by GET /user?id=N
@@ -563,6 +563,6 @@ fn main() {
         }
         ["client", id] => run_client(Some(id), strict),
         ["client"] => run_client(None, strict),
-        _ => eprintln!("usage: json_server server | json_server client [ID|all] [--strict]"),
+        _ => eprintln!("usage: 24_json_server server | 24_json_server client [ID|all] [--strict]"),
     }
 }

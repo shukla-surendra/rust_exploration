@@ -9,7 +9,7 @@
 // - Keys are unique: inserting an existing key replaces its value.
 // - All keys have one type, all values have one type: HashMap<&str, i32>.
 // - NO order: iterating can give the entries in any order, different between runs.
-//   (Need sorted keys? Use BTreeMap, see collections_others.rs.)
+//   (Need sorted keys? Use BTreeMap, see 11_collections_others.rs.)
 // - Not in scope by default: needs `use std::collections::HashMap;`
 //
 // Cheat sheet:
@@ -46,7 +46,7 @@ fn main() {
     // Example 2: Reading values: get() vs []
     // ------------------------------------------------------------------
     println!("\n--- Example 2: get ---");
-    // get returns Option<&V>: the key might not exist. See option_result.rs.
+    // get returns Option<&V>: the key might not exist. See 13_option_result.rs.
     println!("get Alice = {:?}", ages.get("Alice")); // Some(31)
     println!("get Zoe   = {:?}", ages.get("Zoe")); // None
 

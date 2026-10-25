@@ -37,11 +37,25 @@ For example, the vector could contain [Some(10), None, Some(30)], or the entire 
 
 */
 
+// A generic struct: <T> after the name says "T is a type I'll pick later".
+// `value: T` means value has whatever type T turns out to be.
 struct Container<T> {
     value: T,
 }
 
+// The same idea works for functions. To DO something with T you must say what T
+// can do, using a trait bound (see 15_traits.rs):
+//   fn show<T: std::fmt::Display>(item: T) { println!("{}", item); }
+//   (T can be any type that can be printed with {})
+//
+// No runtime cost: the compiler writes a separate copy of the code for each
+// type actually used (Container<i32>, Container<&str>, ...).
+
 fn main() {
+    // T is worked out from the value: here T = i32, so a is a Container<i32>.
     let a = Container { value: 100 };
+    // Same struct, different type: T = &str, so b is a Container<&str>.
     let b = Container { value: "Hello" };
+    // a and b are never used, so the compiler warns "unused variable".
+    // Try:  println!("{} {}", a.value, b.value);
 }

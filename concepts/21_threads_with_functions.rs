@@ -1,6 +1,6 @@
 // Threads that run normal named functions, with input passed in.
 //
-// In simple_threads.rs all the thread's code was written inside the closure.
+// In 19_simple_threads.rs all the thread's code was written inside the closure.
 // Here the work lives in separate functions (greet, square, count_letters), and
 // each thread just calls one of them with its input.
 //
@@ -11,7 +11,7 @@
 //                   let result = h.join().unwrap();       // get the return value back
 //
 // Input can also come from the command line:
-//   ./target/threads_with_functions Alice Bob Carol
+//   ./target/21_threads_with_functions Alice Bob Carol
 // (with no arguments, default names are used)
 
 use std::env;

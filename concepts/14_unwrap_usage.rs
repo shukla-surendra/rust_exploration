@@ -151,7 +151,7 @@ fn main() {
     //   panic!  -> bugs, "this should never happen". Crashes.
     //   Result  -> expected failures (bad input, missing file). Caller decides.
     //
-    // Tip: RUST_BACKTRACE=1 ./target/unwrap_usage shows the chain of calls.
+    // Tip: RUST_BACKTRACE=1 ./target/14_unwrap_usage shows the chain of calls.
     println!("\n--- Example 8: panic! ---");
 
     // Demo: panic inside a spawned thread so main survives and we can watch it.
@@ -171,7 +171,7 @@ fn main() {
     // let bad: Option<i32> = None;
     // bad.unwrap();
     // Output:
-    // thread 'main' panicked at unwrap_usage.rs:...:
+    // thread 'main' panicked at 14_unwrap_usage.rs:...:
     // called `Option::unwrap()` on a `None` value
     // (program exits with code 101; nothing after this line runs)
     println!("Main: end of program");
