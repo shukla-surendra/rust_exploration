@@ -1,0 +1,24 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: postgres-explorer-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-employee}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-employee}
+      POSTGRES_DB: ${POSTGRES_DB:-employee_db}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pgdata:
+    # pinned to the pre-rename volume so existing data is kept
+    name: employee-api_pgdata
+    external: true
