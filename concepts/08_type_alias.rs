@@ -8,7 +8,7 @@
 //
 // Where you'll see aliases in real code: shortening long types, e.g.
 //   type Result<T> = std::result::Result<T, MyError>;
-//   (std::io::Result<T> in 25_requests.rs is exactly this kind of alias.)
+//   (std::io::Result<T> in 44_requests.rs is exactly this kind of alias.)
 //
 // Want the compiler to STOP you mixing Kilometers with plain numbers? That needs
 // a new type, not an alias: `struct Kilometers(i32);` (the "newtype" pattern).

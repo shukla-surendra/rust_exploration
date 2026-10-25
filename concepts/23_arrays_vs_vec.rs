@@ -69,7 +69,7 @@ fn main() {
     println!("v = {:?}, len = {}", v, v.len());
     v.pop();
     println!("after pop: {:?}", v);
-    // More Vec operations in 08_collections_vec.rs.
+    // More Vec operations in 25_collections_vec.rs.
 
     // ------------------------------------------------------------------
     // Example 3: How a Vec grows: len vs capacity
@@ -107,7 +107,7 @@ fn main() {
     // macOS/Linux by default). [0u8; 100_000_000] would overflow it; use a Vec.
 
     // ------------------------------------------------------------------
-    // Example 5: Copy vs move (see 05_passing_values_to_function.rs)
+    // Example 5: Copy vs move (see 21_passing_values_to_function.rs)
     // ------------------------------------------------------------------
     println!("\n--- Example 5: copy vs move ---");
     // An array of Copy items is itself Copy: assigning makes a full copy.
@@ -157,7 +157,7 @@ fn main() {
     println!("array -> Vec: {:?} {:?}", v, v_also);
 
     // Vec -> array: can FAIL (the Vec might have the wrong length), so it returns
-    // Result (see 13_option_result.rs).
+    // Result (see 32_option_result.rs).
     let ok: Result<[i32; 3], _> = v.clone().try_into();
     let bad: Result<[i32; 2], _> = v.try_into();
     println!("Vec(len 3) -> [i32; 3]: {:?}", ok); // Ok([1, 2, 3])

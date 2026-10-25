@@ -4,7 +4,7 @@
 // fast: "is this value in the set?"
 //
 // - Each value appears at most once: inserting a duplicate does nothing.
-// - NO order (like HashMap). Need sorted? Use BTreeSet, see 11_collections_others.rs.
+// - NO order (like HashMap). Need sorted? Use BTreeSet, see 28_collections_others.rs.
 // - Needs `use std::collections::HashSet;`
 //
 // Use it for: removing duplicates, "have I seen this before?", comparing groups

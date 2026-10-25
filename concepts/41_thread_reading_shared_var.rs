@@ -10,7 +10,7 @@
 //   thread 1 clone ──┤
 //   thread 2 clone ──┘
 //
-// Compare with 23_thread_writing_in_shared_var.rs, which needs Arc<Mutex<T>> because
+// Compare with 42_thread_writing_in_shared_var.rs, which needs Arc<Mutex<T>> because
 // the threads WRITE.
 
 use std::sync::Arc;

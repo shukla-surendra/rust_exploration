@@ -77,7 +77,7 @@ fn main() {
     // parse::<i32>() = "parse into an i32" (the ::<> picks the target type).
     println!("\"42\".parse()  = {:?}", "42".parse::<i32>()); // Ok(42)
     println!("\"abc\".parse() = {:?}", "abc".parse::<i32>()); // Err(...): says WHY it failed
-    println!("env HOME      = {:?}", std::env::var("HOME")); // Ok("/Users/..."), see 18_std_env.rs
+    println!("env HOME      = {:?}", std::env::var("HOME")); // Ok("/Users/..."), see 37_std_env.rs
     println!("env NOPE      = {:?}", std::env::var("NOPE")); // Err(NotPresent)
 
     // ------------------------------------------------------------------
@@ -144,7 +144,7 @@ fn main() {
     println!("unwrap: {}", find_user(1).unwrap());
     // expect("msg"): same, but the crash message is yours. Easier to debug.
     println!("expect: {}", divide(9, 3).expect("9 / 3 should work"));
-    // These would panic (see 14_unwrap_usage.rs, Example 8):
+    // These would panic (see 33_unwrap_usage.rs, Example 8):
     // find_user(99).unwrap();               // None
     // divide(1, 0).expect("divide failed"); // Err
 

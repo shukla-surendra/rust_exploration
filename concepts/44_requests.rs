@@ -1,7 +1,7 @@
-// A tiny HTTP client: sends 11 requests to 24_json_server.rs
+// A tiny HTTP client: sends 11 requests to 43_json_server.rs
 //
-// Run the server first (terminal 1):  rustc 24_json_server.rs --edition 2024 && ./24_json_server server
-// Then this client (terminal 2):      ./rs.sh 25_requests.rs
+// Run the server first (terminal 1):  rustc 43_json_server.rs --edition 2024 && ./43_json_server server
+// Then this client (terminal 2):      ./rs.sh 44_requests.rs
 //
 // HTTP is just text over a TCP connection. A GET request looks like:
 //
@@ -19,7 +19,7 @@
 // | send the request text    | stream.write_all(bytes)?      |
 // | read the whole reply     | stream.read_to_string(&mut s)?|
 
-// Read / Write are traits (see 15_traits.rs). They must be in scope to call
+// Read / Write are traits (see 34_traits.rs). They must be in scope to call
 // read_to_string() and write_all() on the stream.
 use std::io::{Read, Write};
 use std::net::TcpStream;

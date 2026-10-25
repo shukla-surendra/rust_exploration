@@ -9,7 +9,7 @@
 // Why bother? Code can then work with "any Animal" without knowing which one:
 //   fn make_noise(a: &impl Animal) { a.sound(); }   // takes a Dog, a Cat, ...
 //   let zoo: Vec<Box<dyn Animal>> = vec![Box::new(Dog), Box::new(Cat)];
-// (Box: 06_box_heap_allocation.rs. Generics, which pair with traits: 16_generics.rs.)
+// (Box: 22_box_heap_allocation.rs. Generics, which pair with traits: 35_generics.rs.)
 //
 // You already use std traits: Display is what makes {} work in println!,
 // Debug makes {:?} work, Clone gives .clone().

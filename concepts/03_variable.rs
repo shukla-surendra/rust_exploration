@@ -4,7 +4,7 @@
 // so you don't have to write it. You can if you want: `let x: i32 = 5;`
 //
 // Variables are IMMUTABLE by default: once set, they can't change.
-// (How to make one changeable: 01_variable_mutability.rs.)
+// (How to make one changeable: 04_variable_mutability.rs.)
 //
 // println! placeholders:
 // | Placeholder | Fills in                            |

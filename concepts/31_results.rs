@@ -9,7 +9,7 @@
 //                                        ^^^  ^^^^^^
 //                     success value is an i32  error is a String message
 //
-// More on Result (and its sibling Option) in 13_option_result.rs.
+// More on Result (and its sibling Option) in 32_option_result.rs.
 /*
 In Rust, Result, Ok, and Err are not reserved keywords. They are defined in Rust's standard library.
 

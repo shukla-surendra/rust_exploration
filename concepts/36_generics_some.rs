@@ -1,6 +1,6 @@
 // Using a nested generic type: Option<Vec<i32>>
 //
-// Read it inside out (see 16_generics.rs):
+// Read it inside out (see 35_generics.rs):
 //   i32               an integer
 //   Vec<i32>          a list of integers
 //   Option<Vec<i32>>  maybe a list of integers, maybe nothing

@@ -1,7 +1,7 @@
 // Other collections: VecDeque, BTreeMap, BTreeSet, BinaryHeap
 //
-// Vec, HashMap and HashSet cover most needs (see 08_collections_vec.rs,
-// 09_collections_hashmap.rs, 10_collections_hashset.rs). Reach for these when you need
+// Vec, HashMap and HashSet cover most needs (see 25_collections_vec.rs,
+// 26_collections_hashmap.rs, 27_collections_hashset.rs). Reach for these when you need
 // something those three are slow at, or don't do.
 //
 // | Collection    | Like...              | Pick it when you need                          |

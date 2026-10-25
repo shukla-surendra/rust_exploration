@@ -2,7 +2,7 @@
 //
 // Environment variables are key=value text settings the OS gives every program
 // (HOME, PATH, USER, ...). You can set your own for one run:
-//   MY_NAME=Ravi ./target/18_std_env
+//   MY_NAME=Ravi ./target/37_std_env
 //
 // | Function                    | Returns                     | Use when                    |
 // |-----------------------------|-----------------------------|-----------------------------|
@@ -37,7 +37,7 @@ fn main() {
         Ok(home) => println!("HOME is {home}"),
         Err(e) => println!("HOME is not available: {e}"),
     }
-    // Shorter, when you are sure it's set (panics if not, see 14_unwrap_usage.rs):
+    // Shorter, when you are sure it's set (panics if not, see 33_unwrap_usage.rs):
     // let home = env::var("HOME").unwrap();
 
     // ------------------------------------------------------------------
@@ -48,7 +48,7 @@ fn main() {
     // "Guest" is a &str, so .to_string() turns it into a String to match Ok's type.
     let name = env::var("MY_NAME").unwrap_or("Guest".to_string());
     println!("MY_NAME = {name}");
-    // Try:  MY_NAME=Ravi ./target/18_std_env   -> MY_NAME = Ravi
+    // Try:  MY_NAME=Ravi ./target/37_std_env   -> MY_NAME = Ravi
 
     // Common real-world use: a config value that is a number, with a default.
     // parse() also returns Result, so it gets its own default too.

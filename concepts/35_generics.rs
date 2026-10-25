@@ -44,7 +44,7 @@ struct Container<T> {
 }
 
 // The same idea works for functions. To DO something with T you must say what T
-// can do, using a trait bound (see 15_traits.rs):
+// can do, using a trait bound (see 34_traits.rs):
 //   fn show<T: std::fmt::Display>(item: T) { println!("{}", item); }
 //   (T can be any type that can be printed with {})
 //
